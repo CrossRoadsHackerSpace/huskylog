@@ -1,4 +1,4 @@
 huskylog
 ========
 
-amateur radio log logbook python curses
+ham amateur radio log logbook python curses
