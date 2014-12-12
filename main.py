@@ -97,7 +97,6 @@ oper = getdefault('oper')
 mqth = getdefault('mqth')
 powr = getdefault('powr')
 band = getdefault('band')
-writeconf()
 
 stdscr = curses.initscr()
 
@@ -124,10 +123,8 @@ def main(stdscr):
   stdscr.getkey()
 
 main(stdscr)
-print(oper)
-print(mqth)
-print(powr)
-print(band)
+
+writeconf()
 curses.endwin()
 
 
