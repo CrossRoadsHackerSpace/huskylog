@@ -34,8 +34,18 @@ def call():
 
 #define location for use with lotw
 #new qth
+#adds new lotw location to database also
 def nqth():
   mqth = input('operator location: ')
+
+def lotw():
+  print('lotw') #edits lotw table 
+
+def importfile():
+  print('import')
+
+def exportfile():
+  print('export')
 
 #display last 10 entries in database base
 def tail():  
@@ -68,37 +78,26 @@ def edit(n):
 # if huskylog.conf is empty, prompt for fields and create it
 config = configparser.ConfigParser()
 config.read('huskylog.conf')
-try:
-  oper = config['DEFAULT']['oper']
-except:
-  print('operator callsign not found in huskylog.conf')
-  oper = input('input operator callsign: ')
-  config['DEFAULT']['oper'] = oper
 
-try:
-  mqth = config['DEFAULT']['mqth']
-except:
-  print('operator location not found in huskylog.conf')
-  mqth = input('input operator location: ')
-  config['DEFAULT']['mqth'] = mqth
+def getdefault(value):
+  confvalue = value
+  try:
+    value = config['DEFAULT'][confvalue]
+  except:
+    print( confvalue + '... not found in huskylog.conf')
+    value = input('input value: ')
+    config['DEFAULT'][confvalue] = value
+  return value
 
-try:
-  powr = config['DEFAULT']['powr']
-except:
-  print('operating power not found in huskylog.conf')
-  powr = input('input operating tx power: ')
-  config['DEFAULT']['powr'] = powr
+def writeconf():
+  with open('huskylog.conf', 'w') as configfile:
+    config.write(configfile)
 
-try:
-  band = config['DEFAULT']['band']
-except:
-  print('operating band not found in huskylog.conf')
-  band = input('input operating tx band: ')
-  config['DEFAULT']['band'] = band
-
-
-with open('huskylog.conf', 'w') as configfile:
-  config.write(configfile)
+oper = getdefault('oper')
+mqth = getdefault('mqth')
+powr = getdefault('powr')
+band = getdefault('band')
+writeconf()
 
 stdscr = curses.initscr()
 
@@ -118,13 +117,17 @@ def main(stdscr):
   stdscr.addstr(3, 49, 'Comments')
   stdscr.addstr(4, 0, '-' * dims[1])
   stdscr.addstr(dims[0]-2, 0, '-' * dims[1])
-  stdscr.addstr(dims[0]-1, 0, 'Enter New Contact:')
+  stdscr.addstr(dims[0]-1, 0, '*Enter New Contact*')
   stdscr.addstr(dims[0]-1, dims[1]-36, 'Type .help for list of all commands')
   stdscr.move(dims[0]-3, 0)
   stdscr.refresh()
   stdscr.getkey()
 
 main(stdscr)
+print(oper)
+print(mqth)
+print(powr)
+print(band)
 curses.endwin()
 
 
