@@ -3,8 +3,6 @@ import configparser
 import curses
 import time
 
-stdscr = curses.initscr()
-
 #open database by callsign stored in huskylog.conf
 #create table if it does not exist
 def connect2db():
@@ -42,7 +40,7 @@ def nqth():
 def powr():
   powr = input('operator tx power: ')
 
-def band():
+def setband():
   band = input('operator tx band: ')
 
 def lotw():
@@ -57,6 +55,10 @@ def exportfile():
 #display last 10 entries in database base
 def tail():  
   print('tail')
+
+#read from database
+def readdb():
+  print('readdb')
 
 #insert qso in database
 def insert(n):  
@@ -109,6 +111,7 @@ def main(stdscr):
   stdscr.addstr(0, int(dims[1]/2)-4, 'Huskylog')
   stdscr.addstr(0, dims[1]-15, 'Power: ' + powr)
   stdscr.addstr(1, dims[1]-15, 'Band : ' + band)
+  stdscr.addstr(2, dims[1]-15, 'Mode : ' + mode)
   stdscr.addstr(3, 0, 'Date     Time')
   stdscr.addstr(3, 15, 'Band')
   stdscr.addstr(3, 21, 'Mode')
@@ -128,8 +131,12 @@ oper = getdefault('oper')
 mqth = getdefault('mqth')
 powr = getdefault('powr')
 band = getdefault('band')
+mode = getdefault('mode')
 
 connect2db()
+
+stdscr = curses.initscr()
+
 main(stdscr)
 
 writeconf()
