@@ -1,35 +1,36 @@
-import sqlite3 as lite
+import sqlite3
 import configparser
 import curses
 import time
 
-#make sqlite database
-def mkdb(n):
-  with con:
-    cur = con.cursor()    
-    cur.execute('''CREATE TABLE logbook(
-      date TEXT, 
-      time TEXT, 
-      band TEXT, 
-      mode TEXT, 
-      call TEXT, 
-      srst TEXT,
-      rrst TEXT,
-      note TEXT,
-      oper TEXT,
-      mqth TEXT,
-      powr TEXT,
-      lotw TEXT,
-      eqsl TEXT
-      ''')
+stdscr = curses.initscr()
 
-#open last database by callsign stored in huskylog.conf
-#con = lite.connect('%oper.db')
+#open database by callsign stored in huskylog.conf
+#create table if it does not exist
 def connect2db():
-  print('connect2db')
+  conn = sqlite3.connect(oper +'.db')
+  db = conn.cursor()    
+  db.execute('''CREATE TABLE IF NOT EXISTS 
+    logbook(
+    date TEXT, 
+    time TEXT, 
+    band TEXT, 
+    mode TEXT, 
+    call TEXT, 
+    srst TEXT,
+    rrst TEXT,
+    note TEXT,
+    oper TEXT,
+    mqth TEXT,
+    powr TEXT,
+    lotw TEXT,
+    eqsl TEXT
+    )
+    ''')
+  db.close()
 
 #define new callsign
-def call():
+def oper():
   oper = input('operator callsign: ')
 
 #define location for use with lotw
@@ -37,6 +38,12 @@ def call():
 #adds new lotw location to database also
 def nqth():
   mqth = input('operator location: ')
+
+def powr():
+  powr = input('operator tx power: ')
+
+def band():
+  band = input('operator tx band: ')
 
 def lotw():
   print('lotw') #edits lotw table 
@@ -53,7 +60,8 @@ def tail():
 
 #insert qso in database
 def insert(n):  
-  cur.execute('''INSERT INTO logbook VALUES(
+  db.execute('''INSERT INTO 
+    logbook VALUES(
     date TEXT,
     time TEXT,
     band TEXT,
@@ -65,7 +73,8 @@ def insert(n):
     mqth TEXT,
     powr TEXT,
     lotw TEXT,
-    eqsl TEXT 
+    eqsl TEXT
+    )
     ''')
 
 #edit callsign in database
@@ -93,13 +102,6 @@ def writeconf():
   with open('huskylog.conf', 'w') as configfile:
     config.write(configfile)
 
-oper = getdefault('oper')
-mqth = getdefault('mqth')
-powr = getdefault('powr')
-band = getdefault('band')
-
-stdscr = curses.initscr()
-
 def main(stdscr):
   dims = stdscr.getmaxyx()
   stdscr.addstr(0, 0, 'Operator: ' + oper)
@@ -122,6 +124,12 @@ def main(stdscr):
   stdscr.refresh()
   stdscr.getkey()
 
+oper = getdefault('oper')
+mqth = getdefault('mqth')
+powr = getdefault('powr')
+band = getdefault('band')
+
+connect2db()
 main(stdscr)
 
 writeconf()
