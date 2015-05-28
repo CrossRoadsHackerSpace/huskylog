@@ -126,7 +126,7 @@ def display(stdscr):
   stdscr.addstr(4, 0, '-' * dims[1])
   stdscr.addstr(dims[0]-2, 0, '-' * dims[1])
   stdscr.addstr(dims[0]-1, 0, '*Enter New Contact*')
-  stdscr.addstr(dims[0]-1, int(dims[1]/2)-17, 'Zulu Date Time: ' + date + " " +zulu)
+  stdscr.addstr(dims[0]-1, int(dims[1]/2)-17, 'Zulu Date Time: '+date+" "+time)
 
   stdscr.addstr(dims[0]-1, dims[1]-36, 'Type .help for list of all commands')
   stdscr.move(dims[0]-3, 0)
@@ -142,7 +142,7 @@ def edit(n):
   print('edit')
 
 date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-zulu = datetime.now(timezone.utc).strftime("%H:%M:%S")
+time = datetime.now(timezone.utc).strftime("%H:%M:%S")
 oper = getdefault('oper')
 mqth = getdefault('mqth')
 powr = getdefault('powr')
@@ -155,13 +155,12 @@ connect2db()
 def main (stdscr):
   display(stdscr)
   dims = stdscr.getmaxyx()
+  
   while True:
-    kbuf = stdscr.getch()
+    kbuf = stdscr.getkey()
     stdscr.addstr(dims[0]-3, 0, kbuf)
     if kbuf == "q": break
   
-  
-
 wrapper(main)
 
 writeconf()
