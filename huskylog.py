@@ -1,7 +1,9 @@
+#!/usr/bin/env python
+
 import sqlite3
 import configparser
-import curses
-import time
+from curses import wrapper
+from datetime import datetime, timezone
 
 #define new callsign
 def oper():
@@ -39,7 +41,7 @@ def writeconf():
     config.write(configfile)
 
 def lotw():
-  print('lotw') #edits lotw table 
+  print('lotw') #edits lotw table
 
 def importfile():
   print('import')
@@ -51,14 +53,14 @@ def exportfile():
 #create table if it does not exist
 def connect2db():
   conn = sqlite3.connect(oper +'.db')
-  db = conn.cursor()    
-  db.execute('''CREATE TABLE IF NOT EXISTS 
+  db = conn.cursor()
+  db.execute('''CREATE TABLE IF NOT EXISTS
     logbook(
-    date TEXT, 
-    time TEXT, 
-    band TEXT, 
-    mode TEXT, 
-    call TEXT, 
+    date TEXT,
+    time TEXT,
+    band TEXT,
+    mode TEXT,
+    call TEXT,
     srst TEXT,
     rrst TEXT,
     note TEXT,
@@ -72,7 +74,7 @@ def connect2db():
   db.close()
 
 #display last 10 entries in database base
-def tail():  
+def tail():
   print('tail')
   b = sqlite3.connect('data/mydb')
   db.row_factory = sqlite3.Row
@@ -87,8 +89,8 @@ def tail():
 def readdb():
   print('readdb')
 #insert qso in database
-def insert(n):  
-  db.execute('''INSERT INTO 
+def insert(n):
+  db.execute('''INSERT INTO
     logbook VALUES(
     date TEXT,
     time TEXT,
@@ -105,64 +107,61 @@ def insert(n):
     )
     ''')
 
-def display(screen):
-  dims = screen.getmaxyx()
-  screen.addstr(0, 0, 'Operator: ' + oper)
-  screen.addstr(1, 0, 'Location: ' + mqth)
-  screen.addstr(0, int(dims[1]/2)-4, 'Huskylog')
-  screen.addstr(0, dims[1]-15, 'Power: ' + powr)
-  screen.addstr(1, dims[1]-15, 'Band : ' + band)
-  screen.addstr(2, dims[1]-15, 'Mode : ' + mode)
-  screen.addstr(3, 0, 'Date     Time')
-  screen.addstr(3, 15, 'Band')
-  screen.addstr(3, 21, 'Mode')
-  screen.addstr(3, 27, 'Callsign')
-  screen.addstr(3, 38, 'SRST')
-  screen.addstr(3, 43, 'RRST')
-  screen.addstr(3, 49, 'Comments')
-  screen.addstr(4, 0, '-' * dims[1])
-  screen.addstr(dims[0]-2, 0, '-' * dims[1])
-  screen.addstr(dims[0]-1, 0, '*Enter New Contact*')
-  screen.addstr(dims[0]-1, dims[1]-36, 'Type .help for list of all commands')
-  screen.move(dims[0]-3, 0)
-  screen.refresh()
+def display(stdscr):
+  dims = stdscr.getmaxyx()
+  stdscr.addstr(0, 0, 'Operator: ' + oper)
+  stdscr.addstr(1, 0, 'Location: ' + mqth)
+  stdscr.addstr(0, int(dims[1]/2)-4, 'Huskylog')
+  stdscr.addstr(0, dims[1]-15, 'Power: ' + powr)
+  stdscr.addstr(1, dims[1]-15, 'Band : ' + band)
+  stdscr.addstr(2, dims[1]-15, 'Mode : ' + mode)
+  stdscr.addstr(3, 0, 'Date')
+  stdscr.addstr(3, 9, 'Time')
+  stdscr.addstr(3, 17, 'Band')
+  stdscr.addstr(3, 23, 'Mode')
+  stdscr.addstr(3, 29, 'Callsign')
+  stdscr.addstr(3, 40, 'SRST')
+  stdscr.addstr(3, 45, 'RRST')
+  stdscr.addstr(3, 51, 'Comments')
+  stdscr.addstr(4, 0, '-' * dims[1])
+  stdscr.addstr(dims[0]-2, 0, '-' * dims[1])
+  stdscr.addstr(dims[0]-1, 0, '*Enter New Contact*')
+  stdscr.addstr(dims[0]-1, int(dims[1]/2)-17, 'Zulu Date Time: ' + date + " " +zulu)
 
-def getinput():
-  while True:
-    list_1=[]
-    n = ''
-    c = screen.getkey()
-    if c != ' ':  	#validate and add item to newlist
-      n += c
-    #elif c == ':':		#validate and add item to oldlist
-    #  print('old')
-    elif c == '.':	#call command starting with .
-      break
-    #else:
-    #  list_1+=[c]
-    print(n,c)
+  stdscr.addstr(dims[0]-1, dims[1]-36, 'Type .help for list of all commands')
+  stdscr.move(dims[0]-3, 0)
+  stdscr.refresh()
+
+def getinput(stdscr):
+    kbuf = stdscr.getch()
 
 #edit callsign in database
 #if more than one, ask which one to edit and confirm
 #option to delete entry in database and confirm
-def edit(n):  
+def edit(n):
   print('edit')
 
+date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+zulu = datetime.now(timezone.utc).strftime("%H:%M:%S")
 oper = getdefault('oper')
 mqth = getdefault('mqth')
 powr = getdefault('powr')
 band = getdefault('band')
 mode = getdefault('mode')
+kbuf = ""
 
 connect2db()
 
-screen = curses.initscr()
+def main (stdscr):
+  display(stdscr)
+  dims = stdscr.getmaxyx()
+  while True:
+    kbuf = stdscr.getch()
+    stdscr.addstr(dims[0]-3, 0, kbuf)
+    if kbuf == "q": break
+  
+  
 
-display(screen)
-
-getinput()
+wrapper(main)
 
 writeconf()
-curses.endwin()
-
-
