@@ -14,7 +14,10 @@ def update_time(stdscr):
     while 1:
         date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         hour = datetime.now(timezone.utc).strftime("%H:%M:%S")
-        stdscr.addstr(dims[0]-1, int(dims[1]/2)-17, 'Zulu Date Time: '+date+" "+hour)
+        stdscr.addstr(dims[0]-1, int(dims[1]/2)-12, 'Zulu: '+date+" "+hour)
+        curses.noecho()
+        curses.curs_set(0)
+        stdscr.keypad(1)
         stdscr.refresh()
         time.sleep(1)
 
@@ -33,6 +36,9 @@ def powr():
 
 def setband():
     band = input('operator tx band: ')
+    
+def setmode():
+    mode = input('operator tx band: ')
 
 def getdefault(value):
     confvalue = value
@@ -139,8 +145,14 @@ def display(stdscr):
     stdscr.move(dims[0]-3, 0)
     stdscr.refresh()
 
-def getinput(stdscr):
-    kbuf = stdscr.getch()
+def display_help(stdscr):
+    dims = stdscr.getmaxyx()
+    stdscr.addstr(dims[0]-9, 0, '.oper <value> #? or new operator name')
+    stdscr.addstr(dims[0]-8, 0, '.nqth <value> #? or new qth name')
+    stdscr.addstr(dims[0]-7, 0, '.band <value> #? or in meters')
+    stdscr.addstr(dims[0]-6, 0, '.powr <value> #? or power in watts')
+    stdscr.addstr(dims[0]-5, 0, '.mode <value> #? or mode of operation')
+    stdscr.addstr(dims[0]-3, 0, " " * dims[1])
 
 #edit callsign in database
 #if more than one, ask which one to edit and confirm
@@ -148,11 +160,13 @@ def getinput(stdscr):
 def edit(n):
     print('edit')
 
+def action(buff):
+    print('action')
+
 #read huskylog.conf for settings
 # if huskylog.conf is empty, prompt for fields and create it
 config = configparser.ConfigParser()
 config.read('huskylog.conf')
-
 
 date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 hour = datetime.now(timezone.utc).strftime("%H:%M:%S")
@@ -161,7 +175,6 @@ mqth = getdefault('mqth')
 powr = getdefault('powr')
 band = getdefault('band')
 mode = getdefault('mode')
-kbuf = ""
 
 connect2db()
 
@@ -171,12 +184,21 @@ def main (stdscr):
     clock.daemon = True
     clock.start()
     dims = stdscr.getmaxyx()
-    
+    buff = ""
+    list = []
     while 1:
-        kbuf = stdscr.getkey()
-        stdscr.addstr(dims[0]-3, 0, kbuf)
-        if kbuf == "q": break
-        #stdscr.refresh()
+        char = stdscr.getkey()
+        if char != " ":
+            buff += char
+            stdscr.addstr(dims[0]-3, 0, buff)
+        if char == " ":
+            list.append(buff)
+        if buff == ".quit\n":
+            break
+        if buff == ".help\n":
+            display_help(stdscr)
+            buff = ""
+        
         
 wrapper(main)
 
